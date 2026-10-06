@@ -7,6 +7,8 @@ import time
 from collections.abc import Callable
 from typing import TYPE_CHECKING
 
+from core.confirm import process_pending_confirmations
+
 if TYPE_CHECKING:
     import numpy as np
     from numpy.typing import NDArray
@@ -65,6 +67,7 @@ class PushToTalkMicrophone:
             with keyboard.Listener(on_press=on_press, on_release=on_release) as listener:
                 while listener.running:
                     time.sleep(0.05)
+                    process_pending_confirmations()
                     if released.is_set():
                         released.clear()
                         with recording_lock:

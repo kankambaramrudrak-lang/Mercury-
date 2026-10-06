@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from typing import Callable
 
 from core.tools import ToolRegistry, build_task_registry
 from tools.tasks import TaskCommands, _parse_task_number
@@ -11,8 +12,13 @@ from tools.tasks import TaskCommands, _parse_task_number
 class CommandRouter:
     """Route all command text through one ``handle`` method."""
 
-    def __init__(self, tasks: TaskCommands, registry: ToolRegistry | None = None) -> None:
-        self._registry = registry or build_task_registry(tasks.store)
+    def __init__(
+        self,
+        tasks: TaskCommands,
+        registry: ToolRegistry | None = None,
+        confirmation_handler: Callable[[str, str], bool] | None = None,
+    ) -> None:
+        self._registry = registry or build_task_registry(tasks.store, confirmation_handler)
 
     def handle(self, text: str) -> str:
         normalized = text.strip().lower().strip(".,!? ")

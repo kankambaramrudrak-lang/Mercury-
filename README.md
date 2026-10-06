@@ -55,9 +55,9 @@ The voice commands are:
 - **List tasks** to hear open tasks and their numbers
 - **Complete task** followed by one task number, for example “Complete task one”
 - **Update task** followed by its number, “to”, and a new description
-- **Delete task** is currently refused without changing the task. Button confirmation is planned for Phase 3.
+- **Delete task** followed by a task number opens a button prompt. The action runs only if you click **Approve**; **Cancel** is the default, and the prompt expires after 30 seconds.
 
-Task data is stored locally in `data\hercules.sqlite3` and persists between runs. The `data\` directory is ignored by Git. Hercules does not log the full recognized utterance or store audio. Spoken and printed replies can include task descriptions when needed to report or confirm a task. If a task number is unclear, it asks you to repeat it instead of selecting a task. Tests use temporary database files and do not access the local task database.
+Task data is stored locally in `data\hercules.sqlite3` and persists between runs. The `data\` directory is ignored by Git. Hercules does not log recognized speech or store audio. Button decisions are recorded in `data\confirmation.log`; each entry contains only the tool name and whether it was approved. The log excludes speech, tool arguments, and task descriptions. Spoken and printed replies can include task descriptions when needed to report or confirm a task. If a task number is unclear, it asks you to repeat it instead of selecting a task. Tests use temporary database files and do not access the local task database.
 
 Hercules prints each spoken response in the terminal immediately before speaking it.
 
@@ -79,5 +79,5 @@ To use Hercules without a microphone, run `python main.py --text`. Type a comman
 
 - `audio/` captures push-to-talk audio, recognizes speech locally, and speaks assistant replies.
 - `core/router.py` routes both typed and recognized text through `CommandRouter.handle()`.
-- `tools/tasks.py` contains the local SQLite task operations. Deletion is refused until a button confirmation exists.
+- `tools/tasks.py` contains the local SQLite task operations. Deletion requires button approval.
 - `main.py` starts the app and selects voice, text, device-list, or speech-test mode.

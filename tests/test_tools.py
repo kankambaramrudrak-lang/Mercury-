@@ -54,7 +54,7 @@ class ToolRegistryTests(unittest.TestCase):
 
         response = self.router.handle("Delete task one")
 
-        self.assertIn("disabled until Phase 3", response)
+        self.assertIn("button confirmation is unavailable", response)
         self.assertEqual(called, [])
         self.assertEqual([task.description for task in self.store.list_open()], ["keep this task"])
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from functools import partial
 from typing import Callable, Literal, Mapping
@@ -26,8 +27,9 @@ class Tool:
 class ToolRegistry:
     """Only invoke functions that have been explicitly registered."""
 
-    def __init__(self) -> None:
+    def __init__(self, confirmation_handler: Callable[[str, str], bool] | None = None) -> None:
         self._tools: dict[str, Tool] = {}
+        self._confirmation_handler = confirmation_handler
 
     def register(self, tool: Tool) -> None:
         if tool.name in self._tools:
@@ -45,14 +47,28 @@ class ToolRegistry:
         if tool is None:
             raise KeyError(f"Tool is not registered: {name}")
         if tool.risk_level == "confirm":
-            return "Deletion is disabled until Phase 3 adds button confirmation. The task is unchanged."
+            if self._confirmation_handler is None:
+                return "Deletion is disabled because button confirmation is unavailable. The task is unchanged."
+            details = "Approve this action?"
+            if name == "delete_task":
+                details = f"Delete task {parameters.get('task_number', 'unknown')}?"
+            try:
+                approved = bool(self._confirmation_handler(f"Confirm {name}", details))
+            except Exception:
+                approved = False
+            logging.getLogger("hercules.confirmations").info("tool=%s approved=%s", name, approved)
+            if not approved:
+                return "Action cancelled or timed out. No changes were made."
         return tool.function(**parameters)
 
 
-def build_task_registry(store: TaskStore) -> ToolRegistry:
+def build_task_registry(
+    store: TaskStore,
+    confirmation_handler: Callable[[str, str], bool] | None = None,
+) -> ToolRegistry:
     """Register the supported local task actions against the supplied store."""
 
-    registry = ToolRegistry()
+    registry = ToolRegistry(confirmation_handler)
 
     def add_task(description: str) -> str:
         task = store.add(description)
@@ -80,15 +96,16 @@ def build_task_registry(store: TaskStore) -> ToolRegistry:
         return f"Updated task {task.id}: {task.description}."
 
     def delete_task(task_number: int) -> str:
-        # This is intentionally a no-op until Phase 3 supplies button confirmation.
-        return f"Deletion is disabled until Phase 3 adds button confirmation. Task {task_number} is unchanged."
+        if store.delete(task_number):
+            return f"Deleted task {task_number}."
+        return f"I couldn't find open task {task_number}. No task was deleted."
 
     registrations = (
         Tool("add_task", "Add a task to the local task list.", {"description": "string"}, "run", add_task),
         Tool("list_tasks", "List open local tasks.", {}, "run", list_tasks),
         Tool("complete_task", "Mark an open local task complete.", {"task_number": "integer"}, "run", complete_task),
         Tool("update_task", "Change an open local task description.", {"task_number": "integer", "description": "string"}, "run", update_task),
-        Tool("delete_task", "Delete a local task after button confirmation is implemented.", {"task_number": "integer"}, "confirm", delete_task),
+        Tool("delete_task", "Delete a local task after button confirmation.", {"task_number": "integer"}, "confirm", delete_task),
         Tool("count_tasks", "Count open local tasks.", {}, "run", partial(count_tasks, store)),
     )
     for tool in registrations:

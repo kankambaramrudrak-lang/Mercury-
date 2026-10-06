@@ -11,12 +11,14 @@ class MainModeTests(unittest.TestCase):
         with (
             patch("main.TaskStore") as task_store,
             patch("main.run_text_mode") as text_mode,
+            patch("main.configure_confirmation_log") as configure_log,
         ):
             result = main(["--text"])
 
         self.assertEqual(result, 0)
         task_store.assert_called_once_with(DATABASE_PATH)
         text_mode.assert_called_once()
+        configure_log.assert_called_once_with()
 
     def test_test_speech_selects_fake_speech_output(self):
         with (

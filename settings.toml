@@ -1,0 +1,5 @@
+# Safe local defaults. Add only app names and device choices you have reviewed.
+workspace_folder = "."
+app_whitelist = []
+microphone_device = "default"
+speech_model_size = "small"

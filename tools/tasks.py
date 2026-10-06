@@ -82,6 +82,14 @@ class TaskStore:
             )
         return cursor.rowcount == 1
 
+    def delete(self, task_id: int) -> bool:
+        """Delete an open task after the caller has confirmed the action."""
+        with self._connection() as connection:
+            cursor = connection.execute(
+                "DELETE FROM tasks WHERE id = ? AND completed = 0", (task_id,)
+            )
+        return cursor.rowcount == 1
+
 def count_tasks(store: TaskStore) -> int:
     """Return the number of open tasks."""
     return len(store.list_open())

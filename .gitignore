@@ -6,6 +6,7 @@ __pycache__/
 model/
 vosk-model-*/
 /data/
+/data/confirmation.log
 *.wav
 *.log
 .env

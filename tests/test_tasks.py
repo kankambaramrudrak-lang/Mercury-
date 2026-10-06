@@ -70,7 +70,7 @@ class RouterTaskTests(unittest.TestCase):
 
         response = self.router.handle("Delete task one")
 
-        self.assertIn("disabled until Phase 3", response)
+        self.assertIn("button confirmation is unavailable", response)
         self.assertEqual([task.description for task in self.store.list_open()], ["buy milk"])
 
     def test_confirmation_phrase_cannot_delete_without_button(self):
@@ -78,7 +78,7 @@ class RouterTaskTests(unittest.TestCase):
 
         response = self.router.handle("Confirm delete task one")
 
-        self.assertIn("disabled until Phase 3", response)
+        self.assertIn("button confirmation is unavailable", response)
         self.assertEqual([task.description for task in self.store.list_open()], ["buy milk"])
 
     def test_count_tasks(self):

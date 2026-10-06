@@ -6,6 +6,8 @@ import argparse
 from pathlib import Path
 from typing import Sequence
 
+from core.confirm import ask_confirmation
+from core.confirmation_log import configure_confirmation_log
 from core.router import CommandRouter
 from core.text_mode import run_text_mode
 from tools.tasks import TaskCommands, TaskStore
@@ -35,7 +37,11 @@ def main(argv: Sequence[str] | None = None) -> int:
         SpeechOutput().speak(TEST_SPEECH_TEXT)
         return 0
 
-    router = CommandRouter(TaskCommands(TaskStore(DATABASE_PATH)))
+    configure_confirmation_log()
+    router = CommandRouter(
+        TaskCommands(TaskStore(DATABASE_PATH)),
+        confirmation_handler=ask_confirmation,
+    )
     if args.text:
         run_text_mode(router)
         return 0
