@@ -46,3 +46,29 @@ python -m compileall -q main.py tests
 ```
 
 If PowerShell blocks virtual-environment activation, run `Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass` in that PowerShell window, then activate `.venv` again. Windows privacy settings must allow microphone access to desktop apps. Recognition quality depends on microphone, room noise, accent, and the small US English model. The prototype listens only while Right Ctrl is held; `pynput` needs to receive global keyboard events, which managed-device policies may restrict.
+
+## Milestone 2A: local tasks
+
+The voice commands are:
+
+- **Add task** followed by a description, for example “Add task buy milk”
+- **List tasks** to hear open tasks and their numbers
+- **Complete task** followed by one task number, for example “Complete task one”
+- **Update task** followed by its number, “to”, and a new description
+- **Delete task** followed by its number; Hercules reads the task and waits for the exact phrase **Confirm delete task** followed by the same number. A bare “yes” cancels the pending deletion.
+
+Task data is stored locally in `data\hercules.sqlite3` and persists between runs. The `data\` directory is ignored by Git. Hercules does not log the full recognized utterance or store audio. Spoken and printed replies can include task descriptions when needed to report or confirm a task. If a task number is unclear, it asks you to repeat it instead of selecting a task. Tests use temporary database files and do not access the local task database.
+
+Hercules prints each spoken response in the terminal immediately before speaking it. If a delete confirmation is unclear or uses another number, Hercules cancels the deletion and leaves the task unchanged.
+
+Run the focused tests with:
+
+```powershell
+python -m unittest discover -s tests -v
+```
+
+## Voice diagnostics
+
+Run `python main.py --test-speech` to speak one fixed sentence through the Windows speech engine without opening the microphone. This checks speaker output separately from recognition.
+
+Run `python main.py --debug-recognition` to use push-to-talk with recognized words displayed in the terminal. This mode exposes your speech locally while it is running; the words are not written to a file or database. Normal runs keep recognized words hidden.
