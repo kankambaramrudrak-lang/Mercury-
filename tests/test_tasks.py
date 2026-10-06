@@ -81,6 +81,13 @@ class RouterTaskTests(unittest.TestCase):
         self.assertIn("disabled until Phase 3", response)
         self.assertEqual([task.description for task in self.store.list_open()], ["buy milk"])
 
+    def test_count_tasks(self):
+        from tools.tasks import count_tasks
+
+        self.assertEqual(count_tasks(self.store), 0)
+        self.store.add("buy milk")
+        self.store.add("call Sam")
+        self.assertEqual(count_tasks(self.store), 2)
 
 if __name__ == "__main__":
     unittest.main()

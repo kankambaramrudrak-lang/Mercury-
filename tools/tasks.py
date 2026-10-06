@@ -82,6 +82,10 @@ class TaskStore:
             )
         return cursor.rowcount == 1
 
+def count_tasks(store: TaskStore) -> int:
+    """Return the number of open tasks."""
+    return len(store.list_open())
+
 _NUMBER_WORDS = {
     "zero": 0,
     "one": 1,
