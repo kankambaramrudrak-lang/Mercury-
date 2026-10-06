@@ -61,14 +61,6 @@ class TaskStore:
             ).fetchall()
         return [Task(int(task_id), str(description)) for task_id, description in rows]
 
-    def get_open(self, task_id: int) -> Task | None:
-        with self._connection() as connection:
-            row = connection.execute(
-                "SELECT id, description FROM tasks WHERE id = ? AND completed = 0",
-                (task_id,),
-            ).fetchone()
-        return Task(int(row[0]), str(row[1])) if row else None
-
     def update(self, task_id: int, description: str) -> Task | None:
         description = description.strip()
         if not description:
@@ -89,14 +81,6 @@ class TaskStore:
                 (task_id,),
             )
         return cursor.rowcount == 1
-
-    def delete(self, task_id: int) -> bool:
-        with self._connection() as connection:
-            cursor = connection.execute(
-                "DELETE FROM tasks WHERE id = ? AND completed = 0", (task_id,)
-            )
-        return cursor.rowcount == 1
-
 
 _NUMBER_WORDS = {
     "zero": 0,
@@ -166,49 +150,19 @@ def _parse_task_number(value: str) -> int | None:
 
 
 class TaskCommands:
-    """Interpret task commands and hold a delete confirmation for one turn."""
+    """Implement non-destructive local task commands."""
 
     def __init__(self, store: TaskStore) -> None:
         self.store = store
-        self.pending_delete_id: int | None = None
 
     def handle(self, text: str) -> str | None:
-        if self.pending_delete_id is not None:
-            return self._handle_delete_confirmation(text)
         return self._handle_new_command(text)
 
-    def cancel_pending_deletion(self) -> bool:
-        """Clear an outstanding delete confirmation after unusable audio."""
-        if self.pending_delete_id is None:
-            return False
-        self.pending_delete_id = None
-        return True
-
-    def _handle_delete_confirmation(self, text: str) -> str:
-        task_id = self.pending_delete_id
-        self.pending_delete_id = None
-        match = re.fullmatch(
-            r"\s*confirm\s+delete\s+task\b(.*?)\s*[.!?]*\s*", text, re.IGNORECASE
-        )
-        confirmed_id = _parse_task_number(match.group(1)) if match else None
-        if confirmed_id != task_id:
-            return "Deletion canceled. The exact task confirmation did not match; nothing was deleted."
-        if self.store.delete(task_id):
-            return f"Deleted task {task_id}."
-        return f"Deletion canceled. Task {task_id} is no longer open. Nothing was deleted."
-
     def _handle_new_command(self, text: str) -> str | None:
-        return _handle_new_task_command(text, self.store, self)
+        return _handle_new_task_command(text, self.store)
 
 
-def handle_task_command(text: str, store: TaskStore) -> str | None:
-    """Handle a single task command without retaining confirmation state."""
-    return TaskCommands(store).handle(text)
-
-
-def _handle_new_task_command(
-    text: str, store: TaskStore, commands: TaskCommands
-) -> str | None:
+def _handle_new_task_command(text: str, store: TaskStore) -> str | None:
     add_match = re.fullmatch(
         r"\s*add\s+task(?:\s+(.*?))?\s*[.!?]*\s*", text, re.IGNORECASE
     )
@@ -255,21 +209,9 @@ def _handle_new_task_command(
             return f"I couldn't find open task {task_id}. Say 'List tasks' to hear your open tasks."
         return f"Updated task {task.id}: {task.description}."
 
-    delete_match = re.fullmatch(
-        r"\s*delete\s+task\b(.*?)\s*[.!?]*\s*", text, re.IGNORECASE
-    )
+    delete_match = re.fullmatch(r"\s*delete\s+task\b.*", text, re.IGNORECASE)
     if delete_match:
-        task_id = _parse_task_number(delete_match.group(1))
-        if task_id is None:
-            return "I need a clear task number. Nothing was deleted. Say 'Delete task' followed by one number."
-        task = store.get_open(task_id)
-        if task is None:
-            return f"I couldn't find open task {task_id}. Nothing was deleted."
-        commands.pending_delete_id = task_id
-        return (
-            f"Task {task.id} is {task.description}. To delete it, say exactly: "
-            f"'Confirm delete task {task.id}'."
-        )
+        return "Deletion is disabled until Phase 3 adds button confirmation. The task is unchanged."
 
     if normalized.startswith("add task"):
         return "What should I add? Say 'Add task' followed by a short description."
@@ -279,8 +221,6 @@ def _handle_new_task_command(
         return "I need a clear task number. Say 'Complete task' followed by one task number."
     if normalized.startswith("update task"):
         return "Say 'Update task' followed by one task number, 'to', and the new description."
-    if normalized.startswith("delete task"):
-        return "I need a clear task number. Nothing was deleted. Say 'Delete task' followed by one number."
     if normalized.startswith("confirm delete task"):
-        return "There is no deletion waiting for confirmation."
+        return "Deletion is disabled until Phase 3 adds button confirmation. No task was changed."
     return None
