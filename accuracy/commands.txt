@@ -1,0 +1,50 @@
+Hey Hercules, are you there?
+Give me a quick hello.
+What can you help me with?
+Add a task to check my email later.
+Can you add buying groceries to my task list?
+Show me my open tasks.
+What tasks are still pending?
+Mark the grocery task as complete.
+Complete task one.
+Change task two to book a dentist appointment.
+Update my task to pick up groceries after work.
+Delete task three.
+Confirm delete task three.
+Cancel that deletion.
+Remind me to check my email tomorrow morning.
+Set a reminder for my meeting at three this afternoon.
+Remind me to call the dentist next Monday.
+Set a timer for ten minutes.
+Start a thirty-minute focus timer.
+How much time is left on my timer?
+Cancel the timer.
+What reminders do I have?
+Delete my ten o'clock reminder.
+Open VS Code.
+Open my Hercules project.
+Open the calculator.
+Search the web for beginner Python tutorials.
+Look up today's weather.
+Find the official Vosk model page.
+Create a folder called project notes in my workspace.
+Make a new folder called receipts in the workspace.
+Show me the folders in my workspace.
+Don't create anything outside the workspace.
+Search my email for the latest message from my bank.
+Find unread emails from this week.
+Summarize the email I just received.
+Draft a reply saying I'll get back to you tomorrow.
+Write an email asking to reschedule my appointment.
+Save this as a draft; don't send it.
+Draft a WhatsApp message saying I'm running ten minutes late.
+Show me the WhatsApp draft.
+Send that message only after I approve it.
+Remind me to call my friend tomorrow morning.
+Call my friend now, but ask before placing the call.
+Ask me before you make a call.
+What's on my calendar tomorrow?
+Add a dentist appointment to my calendar for Monday at nine.
+Move my meeting to two o'clock.
+Delete the calendar event I just mentioned.
+Can you explain what this email means?
