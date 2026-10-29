@@ -23,5 +23,9 @@ class SpeechOutput:
 
     def speak(self, text: str) -> None:
         print(text, flush=True)
+        self.speak_private(text)
+
+    def speak_private(self, text: str) -> None:
+        """Speak sensitive confirmation text without printing it."""
         self._engine.say(text)
         self._engine.runAndWait()

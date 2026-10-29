@@ -1,7 +1,8 @@
-# Hercules project rules
+# Mercury contributor instructions
 
-- Never log or display recognized speech. Do not add speech-debug output; keep recognized words in memory only long enough to route the command, and never save microphone audio.
-- Every risky or destructive action requires a deliberate button confirmation. If that confirmation flow is not implemented, refuse the action without changing data.
-- Use official APIs only. Never automate websites or store passwords.
-- Make small, scoped changes. Tests must use fake components and temporary data; never use real installs, destructive deletes, microphones, or personal databases in tests.
-- At the end of each phase, explain new files in plain English, list all changed files, report checks, and stop for manual review. Do not commit; the user commits changes.
+- Never log or display recognized speech. Keep speech transcripts in memory only long enough to route the request, and never save microphone audio.
+- Risky, external, or destructive actions require deliberate button approval. Cancel, timeout, or a failed confirmation must refuse the action.
+- Use official APIs only. Do not automate websites, store passwords, or let an LLM run arbitrary shell commands.
+- Keep changes scoped. Tests must use fake components and temporary data; do not use real installs, destructive deletes, microphones, provider accounts, or personal databases in tests.
+- Keep setup and privacy documentation aligned with the implementation. Report test evidence and any untested hardware/provider behavior accurately.
+- Do not commit or publish unless the user explicitly requests it.

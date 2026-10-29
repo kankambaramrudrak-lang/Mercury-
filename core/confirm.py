@@ -18,6 +18,7 @@ class _Request:
     deadline: float
     completed: threading.Event = field(default_factory=threading.Event)
     approved: bool = False
+    expired: bool = False
 
 
 Presenter = Callable[[str, str, float], bool]
@@ -32,7 +33,8 @@ def _show_tk_confirmation(title: str, details: str, timeout: float) -> bool:
     # child Toplevel can leave the confirmation hidden on Windows.
     dialog = tk.Tk()
     dialog.title(title)
-    dialog.resizable(False, False)
+    is_long = len(details) > 1_200
+    dialog.resizable(is_long, is_long)
 
     decision = {"approved": False, "done": False}
 
@@ -44,7 +46,16 @@ def _show_tk_confirmation(title: str, details: str, timeout: float) -> bool:
             decision["approved"] = approved
         dialog.destroy()
 
-    tk.Label(dialog, text=details, wraplength=380, justify="left", padx=18, pady=16).pack()
+    if is_long:
+        from tkinter.scrolledtext import ScrolledText
+
+        text_view = ScrolledText(dialog, width=96, height=26, wrap="word", padx=12, pady=10)
+        text_view.insert("1.0", details)
+        text_view.configure(state="disabled")
+        text_view.pack(fill="both", expand=True, padx=10, pady=10)
+        dialog.geometry("900x700")
+    else:
+        tk.Label(dialog, text=details, wraplength=520, justify="left", padx=18, pady=16).pack()
     buttons = tk.Frame(dialog, padx=12, pady=8)
     buttons.pack()
     approve = tk.Button(buttons, text="Approve", command=lambda: finish(True))
@@ -92,6 +103,7 @@ class ConfirmationService:
         self._requests.put(request)
         remaining = max(0.0, request.deadline - time.monotonic())
         if not request.completed.wait(remaining):
+            request.expired = True
             return False
         return request.approved and time.monotonic() < request.deadline
 
@@ -108,7 +120,7 @@ class ConfirmationService:
 
     def _resolve(self, request: _Request) -> None:
         remaining = request.deadline - time.monotonic()
-        if remaining <= 0:
+        if request.expired or remaining <= 0:
             request.completed.set()
             return
         try:
@@ -116,7 +128,7 @@ class ConfirmationService:
         except Exception:
             # A broken or unavailable dialog must fail closed.
             request.approved = False
-        if time.monotonic() >= request.deadline:
+        if request.expired or time.monotonic() >= request.deadline:
             request.approved = False
         request.completed.set()
 

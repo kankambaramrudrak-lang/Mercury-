@@ -1,4 +1,4 @@
-Hey Hercules, are you there?
+Hey Mercury, are you there?
 Give me a quick hello.
 What can you help me with?
 Add a task to check my email later.
@@ -22,7 +22,7 @@ Cancel the timer.
 What reminders do I have?
 Delete my ten o'clock reminder.
 Open VS Code.
-Open my Hercules project.
+Open my Mercury project.
 Open the calculator.
 Search the web for beginner Python tutorials.
 Look up today's weather.

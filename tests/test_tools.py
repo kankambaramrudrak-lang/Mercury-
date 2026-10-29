@@ -38,10 +38,24 @@ class ToolRegistryTests(unittest.TestCase):
         with self.assertRaises(KeyError):
             self.registry.execute("run_arbitrary_action")
 
+    def test_registry_schema_is_limited_to_registered_functions(self):
+        schema_names = {
+            schema["function"]["name"] for schema in self.registry.schemas()
+        }
+        self.assertEqual(schema_names, set(self.registry.names()))
+        self.assertNotIn("shell", schema_names)
+
+    def test_registry_validates_tool_argument_names_and_types(self):
+        with self.assertRaises(ValueError):
+            self.registry.execute("complete_task", task_number="one")
+        with self.assertRaises(ValueError):
+            self.registry.execute("complete_task", task_number=1, extra="ignored")
+
     def test_unrecognized_command_mentions_count_tasks(self):
         response = self.router.handle("do something unexpected")
 
         self.assertIn("Count tasks", response)
+        self.assertIn("button approval", response)
 
     def test_confirm_tool_is_refused_without_calling_its_function(self):
         # Replace the function with a sentinel to verify the confirm gate blocks it.

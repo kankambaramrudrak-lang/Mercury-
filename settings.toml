@@ -1,5 +1,28 @@
-# Safe local defaults. Add only app names and device choices you have reviewed.
+# Safe, portable starter configuration. Paths are relative to this file.
 workspace_folder = "."
 app_whitelist = []
+install_whitelist = []
 microphone_device = "default"
+
+# Default local speech backend. The Vosk model must be downloaded separately.
+speech_recognizer = "vosk"
 speech_model_size = "small"
+vosk_confidence_threshold = 0.65
+faster_whisper_confidence_threshold = 0.45
+
+# Optional local AI. Install Ollama and download a model before enabling.
+local_ai_enabled = false
+local_ai_model = "llama3.2:3b"
+local_ai_url = "http://localhost:11434"
+
+# Optional Google OAuth; keep the client JSON under the ignored secrets/ folder.
+google_enabled = false
+google_credentials_file = "secrets/google-oauth-client.json"
+
+# Optional communications. Requires provider accounts and opted-in contacts.
+contacts_file = "data/contacts.json"
+whatsapp_enabled = false
+whatsapp_graph_version = "v26.0"
+whatsapp_webhook_enabled = false
+whatsapp_webhook_port = 8765
+twilio_enabled = false
